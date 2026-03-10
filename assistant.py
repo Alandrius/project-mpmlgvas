@@ -1,5 +1,5 @@
 from contacts import AddressBook
-from notes import NoteBook, add_note_handler
+from notes import NoteBook, add_note_handler, edit_note_handler, delete_note_handler
 
 def parse_input(user_input: str):
     parts = user_input.strip().split()
@@ -24,6 +24,12 @@ def main() -> None:
 
         elif command == "add-note":
             print(add_note_handler(args, notebook))
+
+        elif command == "edit-note":
+            print(edit_note_handler(args, notebook))
+
+        elif command == "delete-note":
+            print(delete_note_handler(args, notebook))
 
 if __name__ == "__main__":
     main()
