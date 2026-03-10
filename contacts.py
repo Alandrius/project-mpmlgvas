@@ -31,3 +31,17 @@ class AddressBook:
                 search_text in contact.email.lower()):
                 results.append(contact)
         return results
+    
+    def find_contact(self, name):
+        """Знайти контакт за точним ім'ям"""
+        for contact in self.contacts:
+            if contact.name.lower() == name.lower():
+                return contact
+        return None
+    
+    def delete_contact(self, name):
+        """Видалити контакт за ім'ям"""
+        for i, contact in enumerate(self.contacts):
+            if contact.name.lower() == name.lower():
+                return self.contacts.pop(i)
+        return None

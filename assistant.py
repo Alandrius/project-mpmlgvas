@@ -40,13 +40,63 @@ def search_contacts(book, args):
             if contact.address:
                 print(f"     🏠 {contact.address}")
 
+def edit_contact(book, args):
+    """Редагування контакту"""
+    if not args:
+        print("❌ Вкажи ім'я контакту для редагування. Приклад: edit Іван")
+        return
+    
+    name = " ".join(args)
+    contact = book.find_contact(name)
+    
+    if not contact:
+        print(f"❌ Контакт '{name}' не знайдено")
+        return
+    
+    print(f"\nРедагуємо контакт: {contact.name}")
+    print("(Залиш поле порожнім, щоб не змінювати)")
+    
+    new_name = input(f"Ім'я [{contact.name}]: ")
+    if new_name:
+        contact.name = new_name
+    
+    new_phone = input(f"Телефон [{contact.phone}]: ")
+    if new_phone:
+        contact.phone = new_phone
+    
+    new_email = input(f"Email [{contact.email}]: ")
+    if new_email:
+        contact.email = new_email
+    
+    new_address = input(f"Адреса [{contact.address}]: ")
+    if new_address:
+        contact.address = new_address
+    
+    print(f"✅ Контакт оновлено!")
+
+def delete_contact(book, args):
+    """Видалення контакту"""
+    if not args:
+        print("❌ Вкажи ім'я контакту для видалення. Приклад: delete Іван")
+        return
+    
+    name = " ".join(args)
+    deleted = book.delete_contact(name)
+    
+    if deleted:
+        print(f"✅ Контакт '{name}' видалено")
+    else:
+        print(f"❌ Контакт '{name}' не знайдено")
+
 def main() -> None:
     book = AddressBook()
     print("Welcome to the assistant bot!")
     print("Доступні команди:")
-    print("  add / add-contact [ім'я] [телефон]  - додати контакт")
-    print("  search / search-contact [текст]     - пошук контактів")
-    print("  exit                                 - вихід")
+    print("  add / add-contact [ім'я] [телефон]          - додати контакт")
+    print("  search / search-contact [текст]             - пошук контактів")
+    print("  edit / edit-contact [ім'я]                  - редагувати контакт")
+    print("  delete / delete-contact [ім'я]              - видалити контакт")
+    print("  exit                                         - вихід")
     
     while True:
         user_input = input("\nEnter a command: ")
@@ -59,6 +109,10 @@ def main() -> None:
             add_contact(book, args)
         elif command in ["search", "search-contact"]:
             search_contacts(book, args)
+        elif command in ["edit", "edit-contact"]:
+            edit_contact(book, args)
+        elif command in ["delete", "delete-contact"]:
+            delete_contact(book, args)
         else:
             print("❌ Невідома команда")
 
