@@ -14,13 +14,9 @@ def add_contact(book, args):
         print("❌ Потрібно вказати ім'я та телефон. Приклад: add Іван 0501234567")
         return
     
-    name = args[0]
-    phone = args[1]
-    
-    # Створюємо новий контакт
+    name, phone = args[:2]
     contact = Contact(name, phone=phone)
     book.add_contact(contact)
-    
     print(f"✅ Контакт {name} з телефоном {phone} успішно додано!")
 
 def search_contacts(book, args):
@@ -48,9 +44,9 @@ def main() -> None:
     book = AddressBook()
     print("Welcome to the assistant bot!")
     print("Доступні команди:")
-    print("  add [ім'я] [телефон]  - додати контакт")
-    print("  search [текст]        - пошук контактів")
-    print("  exit                  - вихід")
+    print("  add / add-contact [ім'я] [телефон]  - додати контакт")
+    print("  search / search-contact [текст]     - пошук контактів")
+    print("  exit                                 - вихід")
     
     while True:
         user_input = input("\nEnter a command: ")
@@ -59,9 +55,9 @@ def main() -> None:
         if command in ["close", "exit"]:
             print("Good bye!")
             break
-        elif command == "add":
+        elif command in ["add", "add-contact"]:
             add_contact(book, args)
-        elif command == "search":
+        elif command in ["search", "search-contact"]:
             search_contacts(book, args)
         else:
             print("❌ Невідома команда")
