@@ -1,5 +1,5 @@
 from contacts import AddressBook
-
+from notes import NoteBook, add_note_handler
 
 def parse_input(user_input: str):
     parts = user_input.strip().split()
@@ -12,6 +12,7 @@ def parse_input(user_input: str):
     
 def main() -> None:
     book = AddressBook()
+    notebook = NoteBook()
     print("Welcome to the assistant bot!")
     while True:
         user_input = input("Enter a command: ")
@@ -21,6 +22,8 @@ def main() -> None:
             print("Good bye!")
             break
 
+        elif command == "add-note":
+            print(add_note_handler(args, notebook))
 
 if __name__ == "__main__":
     main()
