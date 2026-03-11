@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 class Contact:
     """Клас для одного контакту"""
     def __init__(self, name, address="", phone="", email="", birthday=""):
@@ -5,7 +7,21 @@ class Contact:
         self.address = address
         self.phone = phone
         self.email = email
-        self.birthday = birthday
+        self.birthday = birthday  # формат: "YYYY-MM-DD"
+    
+    def days_to_birthday(self):
+        """Скільки днів до дня народження"""
+        if not self.birthday:
+            return None
+        
+        today = datetime.now().date()
+        bday = datetime.strptime(self.birthday, "%Y-%m-%d").date()
+        next_bday = bday.replace(year=today.year)
+        
+        if next_bday < today:
+            next_bday = next_bday.replace(year=today.year + 1)
+        
+        return (next_bday - today).days
 
 class AddressBook:
     """Клас для книги контактів"""
@@ -45,3 +61,17 @@ class AddressBook:
             if contact.name.lower() == name.lower():
                 return self.contacts.pop(i)
         return None
+    
+    # 👇 НОВИЙ МЕТОД ДЛЯ ДНІВ НАРОДЖЕННЯ
+    def get_birthdays_in_days(self, days):
+        """Повертає список контактів, у яких день народження через вказану кількість днів"""
+        results = []
+        target_date = datetime.now().date() + timedelta(days=days)
+        
+        for contact in self.contacts:
+            if contact.birthday:
+                days_to = contact.days_to_birthday()
+                if days_to == days:
+                    results.append(contact)
+        
+        return results

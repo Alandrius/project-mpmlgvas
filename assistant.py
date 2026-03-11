@@ -15,9 +15,13 @@ def add_contact(book, args):
         return
     
     name, phone = args[:2]
-    contact = Contact(name, phone=phone)
+    
+    # Запитати день народження (необов'язково)
+    birthday = input("День народження (РРРР-ММ-ДД, або Enter щоб пропустити): ")
+    
+    contact = Contact(name, phone=phone, birthday=birthday)
     book.add_contact(contact)
-    print(f"✅ Контакт {name} з телефоном {phone} успішно додано!")
+    print(f"✅ Контакт {name} додано!")
 
 def search_contacts(book, args):
     """Пошук контактів за текстом"""
@@ -39,6 +43,12 @@ def search_contacts(book, args):
                 print(f"     ✉️ {contact.email}")
             if contact.address:
                 print(f"     🏠 {contact.address}")
+            if contact.birthday:
+                days = contact.days_to_birthday()
+                if days == 0:
+                    print("     🎂 СЬОГОДНІ ДЕНЬ НАРОДЖЕННЯ!")
+                elif days:
+                    print(f"     🎂 До дня народження {days} днів")
 
 def edit_contact(book, args):
     """Редагування контакту"""
@@ -72,6 +82,10 @@ def edit_contact(book, args):
     if new_address:
         contact.address = new_address
     
+    new_birthday = input(f"День народження [{contact.birthday}]: ")
+    if new_birthday:
+        contact.birthday = new_birthday
+    
     print(f"✅ Контакт оновлено!")
 
 def delete_contact(book, args):
@@ -88,6 +102,28 @@ def delete_contact(book, args):
     else:
         print(f"❌ Контакт '{name}' не знайдено")
 
+# 👇 НОВА ФУНКЦІЯ ДЛЯ ДНІВ НАРОДЖЕННЯ
+def show_birthdays(book, args):
+    """Показати контакти з днями народження через N днів"""
+    if not args:
+        print("❌ Вкажи кількість днів. Приклад: birthdays 7")
+        return
+    
+    try:
+        days = int(args[0])
+    except ValueError:
+        print("❌ Вкажи число днів. Приклад: birthdays 7")
+        return
+    
+    results = book.get_birthdays_in_days(days)
+    
+    if not results:
+        print(f"📭 Немає іменинників через {days} днів")
+    else:
+        print(f"🎂 Іменинники через {days} днів:")
+        for contact in results:
+            print(f"  {contact.name} - {contact.birthday}")
+
 def main() -> None:
     book = AddressBook()
     print("Welcome to the assistant bot!")
@@ -96,6 +132,7 @@ def main() -> None:
     print("  search / search-contact [текст]             - пошук контактів")
     print("  edit / edit-contact [ім'я]                  - редагувати контакт")
     print("  delete / delete-contact [ім'я]              - видалити контакт")
+    print("  birthdays / bday [дні]                      - список іменинників через N днів")
     print("  exit                                         - вихід")
     
     while True:
@@ -113,6 +150,8 @@ def main() -> None:
             edit_contact(book, args)
         elif command in ["delete", "delete-contact"]:
             delete_contact(book, args)
+        elif command in ["birthdays", "bday"]:
+            show_birthdays(book, args)
         else:
             print("❌ Невідома команда")
 
