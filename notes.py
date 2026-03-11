@@ -25,6 +25,19 @@ class NoteBook(UserDict):
         self.data[note.title] = note
         return note
     
+    def edit_note(self, title: str, new_text: str) -> Note:
+        note = self.data.get(title.strip())
+        if note is None:
+            raise KeyError(f"Нотатку '{title}' не знайдено.")
+        note.text = new_text.strip()
+        note.updated_at = datetime.now()
+        return note
+
+    def delete_note(self, title: str) -> None:
+        if title.strip() not in self.data:
+            raise KeyError(f"Нотатку '{title}' не знайдено.")
+        del self.data[title.strip()]
+    
 # Обробник команди add-note
 def add_note_handler(args: list, notebook: NoteBook) -> str:
     if len(args) < 2:
@@ -35,4 +48,27 @@ def add_note_handler(args: list, notebook: NoteBook) -> str:
         note = notebook.add_note(title, text)
         return f"Нотатку '{note.title}' додано."
     except ValueError as e:
+        return str(e)
+    
+# Обробник команди edit-note
+def edit_note_handler(args: list, notebook: NoteBook) -> str:
+    if len(args) < 2:
+        return "Використання: edit-note <назва> <новий текст>"
+    title = args[0]
+    new_text = " ".join(args[1:])
+    try:
+        note = notebook.edit_note(title, new_text)
+        return f"Нотатку '{note.title}' оновлено."
+    except KeyError as e:
+        return str(e)
+
+# Обробник команди delete-note
+def delete_note_handler(args: list, notebook: NoteBook) -> str:
+    if len(args) < 1:
+        return "Використання: delete-note <назва>"
+    title = args[0]
+    try:
+        notebook.delete_note(title)
+        return f"Нотатку '{title}' видалено."
+    except KeyError as e:
         return str(e)
