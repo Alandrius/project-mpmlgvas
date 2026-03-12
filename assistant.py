@@ -5,6 +5,7 @@ from contacts import (
     edit_contact_handler,
     delete_contact_handler,
     show_birthdays_handler,
+    show_all_contacts_handler,
 )
 from notes import (
     NoteBook,
@@ -36,6 +37,7 @@ def main() -> None:
     print("  edit / edit-contact [ім'я]                   - редагувати контакт")
     print("  delete / delete-contact [ім'я]               - видалити контакт")
     print("  birthdays / bday [дні]                       - список іменинників")
+    print("  show-all / show-all-contacts / contacts               - показати всі контакти")
     print("  exit                                          - вихід")
     
     while True:
@@ -55,6 +57,8 @@ def main() -> None:
             print(delete_contact_handler(book, args))
         elif command in ["birthdays", "bday"]:
             print(show_birthdays_handler(book, args))
+        elif command in ["show-all", "show-all-contacts", "contacts", "list"]:
+            print(show_all_contacts_handler(book, args))
         
         elif command == "add-note":
             print(add_note_handler(args, notebook))
