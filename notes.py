@@ -106,3 +106,6 @@ def sort_by_date_handler(notebook: NoteBook) -> str:
     if not results:
         return "Нотаток ще немає."
     return "\n\n".join(str(note) for note in results)
+
+def all_notes_handler(notebook: NoteBook) -> str:
+    return sort_by_date_handler(notebook)
