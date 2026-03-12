@@ -37,6 +37,16 @@ class NoteBook(UserDict):
         if title.strip() not in self.data:
             raise KeyError(f"Нотатку '{title}' не знайдено.")
         del self.data[title.strip()]
+
+    def search_by_title(self, query: str) -> list[Note]:
+        q = query.strip().lower()
+        return [note for note in self.data.values() if q in note.title.lower()]
+
+    def sort_by_title(self) -> list[Note]:
+        return sorted(self.data.values(), key=lambda note: note.title.lower())
+
+    def sort_by_date(self) -> list[Note]:
+        return sorted(self.data.values(), key=lambda note: note.created_at)
     
 # Обробник команди add-note
 def add_note_handler(args: list, notebook: NoteBook) -> str:
@@ -72,3 +82,27 @@ def delete_note_handler(args: list, notebook: NoteBook) -> str:
         return f"Нотатку '{title}' видалено."
     except KeyError as e:
         return str(e)
+    
+# Обробник команди search_by_title
+def search_by_title_handler(args: list, notebook: NoteBook) -> str:
+    if len(args) < 1:
+        return "Використання: search-note <запит>"
+    query = " ".join(args)
+    results = notebook.search_by_title(query)
+    if not results:
+        return f"Нотаток з назвою '{query}' не знайдено."
+    return "\n\n".join(str(note) for note in results)
+
+# Обробник команди sort_by_title
+def sort_by_title_handler(notebook: NoteBook) -> str:
+    results = notebook.sort_by_title()
+    if not results:
+        return "Нотаток ще немає."
+    return "\n\n".join(str(note) for note in results)
+
+# Обробник команди sort_by_date
+def sort_by_date_handler(notebook: NoteBook) -> str:
+    results = notebook.sort_by_date()
+    if not results:
+        return "Нотаток ще немає."
+    return "\n\n".join(str(note) for note in results)
