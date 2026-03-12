@@ -14,6 +14,7 @@ from notes import (
     search_by_title_handler,
     sort_by_title_handler,
     sort_by_date_handler,
+    all_notes_handler,
 )
 
 
@@ -62,6 +63,8 @@ def main() -> None:
             print(edit_note_handler(args, notebook))
         elif command == "delete-note":
             print(delete_note_handler(args, notebook))
+        elif command == "all-notes":
+            print(all_notes_handler(notebook))
         elif command == "search-note":
             print(search_by_title_handler(args, notebook))
         elif command == "sort-notes-title":
