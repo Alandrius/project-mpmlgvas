@@ -230,3 +230,26 @@ def show_birthdays_handler(book, args):
         print(f"🎂 Іменинники через {days} днів:")
         for contact in results:
             print(f"  {contact.name} - {contact.birthday}")
+
+
+def show_all_contacts_handler(book, args):
+    """Показати всі контакти"""
+    contacts = book.get_all_contacts()
+    if not contacts:
+        print("📭 Список контактів порожній")
+        return
+
+    print(f"📒 Всього контактів: {len(contacts)}")
+    for contact in contacts:
+        print(f"  📌 {contact.name}")
+        print(f"     📞 {contact.phone}")
+        if contact.email:
+            print(f"     ✉️ {contact.email}")
+        if contact.address:
+            print(f"     🏠 {contact.address}")
+        if contact.birthday:
+            days = contact.days_to_birthday()
+            if days == 0:
+                print("     🎂 СЬОГОДНІ ДЕНЬ НАРОДЖЕННЯ!")
+            elif days:
+                print(f"     🎂 До дня народження {days} днів")
