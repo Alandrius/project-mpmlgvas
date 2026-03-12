@@ -1,4 +1,13 @@
 from contacts import AddressBook, Contact
+from notes import (
+    NoteBook,
+    add_note_handler,
+    edit_note_handler,
+    delete_note_handler,
+    search_by_title_handler,
+    sort_by_title_handler,
+    sort_by_date_handler,
+)
 
 def parse_input(user_input: str):
     parts = user_input.strip().split()
@@ -90,6 +99,7 @@ def delete_contact(book, args):
 
 def main() -> None:
     book = AddressBook()
+    notebook = NoteBook()
     print("Welcome to the assistant bot!")
     print("Доступні команди:")
     print("  add / add-contact [ім'я] [телефон]          - додати контакт")
@@ -113,8 +123,23 @@ def main() -> None:
             edit_contact(book, args)
         elif command in ["delete", "delete-contact"]:
             delete_contact(book, args)
+        
+        elif command == "add-note":
+            print(add_note_handler(args, notebook))
+        elif command == "edit-note":
+            print(edit_note_handler(args, notebook))
+        elif command == "delete-note":
+            print(delete_note_handler(args, notebook))
+        elif command == "search-note":
+            print(search_by_title_handler(args, notebook))
+        elif command == "sort-notes-title":
+            print(sort_by_title_handler(notebook))
+        elif command == "sort-notes-date":
+            print(sort_by_date_handler(notebook))
+
         else:
             print("❌ Невідома команда")
 
+            
 if __name__ == "__main__":
     main()
