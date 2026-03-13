@@ -12,9 +12,14 @@ from notes import (
     add_note_handler,
     edit_note_handler,
     delete_note_handler,
+    add_tags_handler,
+    remove_tag_handler,
     search_by_title_handler,
+    search_by_tag_handler,
     sort_by_title_handler,
     sort_by_date_handler,
+    sort_by_tag_handler,
+    all_notes_handler,
 )
 
 
@@ -66,12 +71,22 @@ def main() -> None:
             print(edit_note_handler(args, notebook))
         elif command == "delete-note":
             print(delete_note_handler(args, notebook))
+        elif command == "add-tags":
+            print(add_tags_handler(args, notebook))
+        elif command == "remove-tag":
+            print(remove_tag_handler(args, notebook))
+        elif command == "all-notes":
+            print(all_notes_handler(notebook))
         elif command == "search-note":
             print(search_by_title_handler(args, notebook))
+        elif command == "search-tag":
+            print(search_by_tag_handler(args, notebook))
         elif command == "sort-notes-title":
             print(sort_by_title_handler(notebook))
         elif command == "sort-notes-date":
             print(sort_by_date_handler(notebook))
+        elif command == "sort-notes-tag":
+            print(sort_by_tag_handler(notebook))
 
         else:
             print("❌ Невідома команда")
