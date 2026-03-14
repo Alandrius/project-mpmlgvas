@@ -151,17 +151,22 @@ class NoteBook(UserDict):
     
 # Обробник команди add-note
 @input_error
-@require_args(2, "Використання: add-note <назва> <текст>", args_index=0)
-def add_note_handler(args: list, notebook: NoteBook) -> str:
-    title = args[0]
-    text = " ".join(args[1:])
+def add_note_handler(notebook: NoteBook, args: list) -> str:
+    """Додає нотатку. Якщо args порожній, запитує назву та текст у користувача."""
+    if not args:
+        title = input("Назва нотатки: ").strip()
+        text = input("Текст нотатки: ").strip()
+    else:
+        title = args[0]
+        text = " ".join(args[1:])
+
     note = notebook.add_note(title, text)
     return f"✅ Нотатку '{note.title}' додано."
     
 # Обробник команди edit-note
 @input_error
 @require_args(2, "Використання: edit-note <назва> <новий текст>", args_index=0)
-def edit_note_handler(args: list, notebook: NoteBook) -> str:
+def edit_note_handler(notebook: NoteBook, args: list) -> str:
     title = args[0]
     new_text = " ".join(args[1:])
     note = notebook.edit_note(title, new_text)
@@ -170,7 +175,7 @@ def edit_note_handler(args: list, notebook: NoteBook) -> str:
 # Обробник команди delete-note
 @input_error
 @require_args(1, "Використання: delete-note <назва>", args_index=0)
-def delete_note_handler(args: list, notebook: NoteBook) -> str:
+def delete_note_handler(notebook: NoteBook, args: list) -> str:
     title = args[0]
     notebook.delete_note(title)
     return f"✅ Нотатку '{title}' видалено."
@@ -178,7 +183,7 @@ def delete_note_handler(args: list, notebook: NoteBook) -> str:
 # Обробник команди add-tags
 @input_error
 @require_args(2, "Використання: add-tags <назва нотатки> <тег1> <тег2> ...", args_index=0)
-def add_tags_handler(args: list, notebook: NoteBook) -> str:
+def add_tags_handler(notebook: NoteBook, args: list) -> str:
     title = args[0]
     tags = args[1:]
     note = notebook.add_tags(title, tags)
@@ -187,7 +192,7 @@ def add_tags_handler(args: list, notebook: NoteBook) -> str:
 # Обробник команди remove_tag
 @input_error
 @require_args(2, "Використання: remove-tag <назва нотатки> <тег>", args_index=0)
-def remove_tag_handler(args: list, notebook: NoteBook) -> str:
+def remove_tag_handler(notebook: NoteBook, args: list) -> str:
     title = args[0]
     tag = args[1]
     note = notebook.remove_tag(title, tag)
@@ -196,43 +201,43 @@ def remove_tag_handler(args: list, notebook: NoteBook) -> str:
 # Обробник команди search_by_title
 @input_error
 @require_args(1, "Використання: search-note <запит>", args_index=0)
-def search_by_title_handler(args: list, notebook: NoteBook) -> str:
+def search_by_title_handler(notebook: NoteBook, args: list):
     query = " ".join(args)
     results = notebook.search_by_title(query)
     if not results:
         return f"📭 Нотаток з назвою '{query}' не знайдено."
-    return "\n\n".join(str(note) for note in results)
+    return results
 
 # Обробник команди search_by_tag
 @input_error
 @require_args(1, "Використання: search-tag <тег>", args_index=0)
-def search_by_tag_handler(args: list, notebook: NoteBook) -> str:
+def search_by_tag_handler(notebook: NoteBook, args: list):
     tag = args[0]
     results = notebook.search_by_tag(tag)
     if not results:
         return f"📭 Нотаток з тегом '{tag}' не знайдено."
-    return "\n\n".join(str(note) for note in results)
+    return results
 
 # Обробник команди sort_by_title
-def sort_by_title_handler(notebook: NoteBook) -> str:
+def sort_by_title_handler(notebook: NoteBook, args: list):
     results = notebook.sort_by_title()
     if not results:
         return "📭 Нотаток ще немає."
-    return "\n\n".join(str(note) for note in results)
+    return results
 
 # Обробник команди sort_by_date
-def sort_by_date_handler(notebook: NoteBook) -> str:
+def sort_by_date_handler(notebook: NoteBook, args: list):
     results = notebook.sort_by_date()
     if not results:
         return "📭 Нотаток ще немає."
-    return "\n\n".join(str(note) for note in results)
+    return results
 
 # Обробник команди sort_by_tag
-def sort_by_tag_handler(notebook: NoteBook) -> str:
+def sort_by_tag_handler(notebook: NoteBook, args: list):
     results = notebook.sort_by_tag()
     if not results:
         return "📭 Нотаток ще немає."
-    return "\n\n".join(str(note) for note in results)
+    return results
 
-def all_notes_handler(notebook: NoteBook) -> str:
-    return sort_by_date_handler(notebook)
+def all_notes_handler(notebook: NoteBook, args: list):
+    return sort_by_date_handler(notebook, args)

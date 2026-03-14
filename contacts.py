@@ -8,6 +8,31 @@ from validation import (
     require_args,
 )
 
+try:
+    from colorama import Fore, Style, init as colorama_init
+    colorama_init(autoreset=True)
+except ImportError:
+    Fore = Style = None
+
+
+def color_text(text: str, fore=None, back=None, style=None) -> str:
+    """Wrap text with colorama codes if available."""
+    if Fore is None or Style is None:
+        return text
+
+    parts = []
+    if style:
+        parts.append(style)
+    if fore:
+        parts.append(fore)
+    if back:
+        parts.append(back)
+
+    parts.append(text)
+    parts.append(Style.RESET_ALL)
+    return "".join(parts)
+
+
 class Contact:
     """Клас для одного контакту"""
     def __init__(self, name, address="", phone="", email="", birthday=""):
@@ -90,7 +115,7 @@ def add_contact_handler(book, args):
     """Додавання нового контакту з валідацією"""
     name_input = args[0]
     phone_input = args[1]
-    
+
     # Валідація імені
     valid, name = validate_name(name_input)
     if not valid:
@@ -124,24 +149,24 @@ def search_contacts_handler(book, args):
     """Пошук контактів"""
     search_text = " ".join(args)
     results = book.search_contacts(search_text)
-    
+
     if not results:
         return f"❌ Нічого не знайдено за запитом '{search_text}'"
 
-    lines = [f"✅ Знайдено {len(results)} контактів:"]
+    lines = [color_text(f"✅ Знайдено {len(results)} контактів:", fore=Fore.GREEN, style=Style.BRIGHT)]
     for contact in results:
-        lines.append(f"  📌 {contact.name}")
-        lines.append(f"     📞 {contact.phone}")
+        lines.append(color_text(f"  📌 {contact.name}", fore=Fore.YELLOW, style=Style.BRIGHT))
+        lines.append(color_text(f"     📞 {contact.phone}", fore=Fore.GREEN))
         if contact.email:
-            lines.append(f"     ✉️ {contact.email}")
+            lines.append(color_text(f"     ✉️ {contact.email}", fore=Fore.BLUE))
         if contact.address:
-            lines.append(f"     🏠 {contact.address}")
+            lines.append(color_text(f"     🏠 {contact.address}", fore=Fore.MAGENTA))
         if contact.birthday:
             days = contact.days_to_birthday()
             if days == 0:
-                lines.append("     🎂 СЬОГОДНІ ДЕНЬ НАРОДЖЕННЯ!")
+                lines.append(color_text("     🎂 СЬОГОДНІ ДЕНЬ НАРОДЖЕННЯ!", fore=Fore.RED, style=Style.BRIGHT))
             elif days:
-                lines.append(f"     🎂 До дня народження {days} днів")
+                lines.append(color_text(f"     🎂 До дня народження {days} днів", fore=Fore.CYAN))
     return "\n".join(lines)
 
 @input_error
@@ -150,7 +175,7 @@ def edit_contact_handler(book, args):
     """Редагування контакту з валідацією"""
     name = " ".join(args)
     contact = book.find_contact(name)
-    
+
     if not contact:
         raise KeyError(f"❌ Контакт '{name}' не знайдено")
     
@@ -185,7 +210,8 @@ def edit_contact_handler(book, args):
             raise ValueError(result)
     
     # Редагування дня народження
-    new_birthday = input(f"День народження [{contact.birthday}]: ")
+    current_bday = contact.birthday.isoformat() if contact.birthday else ""
+    new_birthday = input(f"День народження [{current_bday}]: ")
     if new_birthday:
         valid, result = validate_birthday(new_birthday)
         if valid:
@@ -201,7 +227,7 @@ def delete_contact_handler(book, args):
     """Видалення контакту"""
     name = " ".join(args)
     deleted = book.delete_contact(name)
-    
+
     if deleted:
         return f"✅ Контакт '{name}' видалено"
     raise KeyError(f"❌ Контакт '{name}' не знайдено")
@@ -218,13 +244,13 @@ def show_birthdays_handler(book, args):
         raise ValueError("❌ Кількість днів не може бути від'ємною")
     
     results = book.get_birthdays_in_days(days)
-    
-    if not results:
-        return f"📭 Немає іменинників через {days} днів"
 
-    lines = [f"🎂 Іменинники через {days} днів:"]
+    if not results:
+        return color_text(f"📭 Немає іменинників через {days} днів", fore=Fore.YELLOW)
+
+    lines = [color_text(f"🎂 Іменинники через {days} днів:", fore=Fore.CYAN, style=Style.BRIGHT)]
     for contact in results:
-        lines.append(f"  {contact.name} - {contact.birthday}")
+        lines.append(color_text(f"  {contact.name} - {contact.birthday}", fore=Fore.YELLOW))
     return "\n".join(lines)
 
 
@@ -233,20 +259,20 @@ def show_all_contacts_handler(book, args):
     """Показати всі контакти"""
     contacts = book.get_all_contacts()
     if not contacts:
-        return "📭 Список контактів порожній"
+        return color_text("📭 Список контактів порожній", fore=Fore.YELLOW)
 
-    lines = [f"📒 Всього контактів: {len(contacts)}"]
+    lines = [color_text(f"📒 Всього контактів: {len(contacts)}", fore=Fore.CYAN, style=Style.BRIGHT)]
     for contact in contacts:
-        lines.append(f"  📌 {contact.name}")
-        lines.append(f"     📞 {contact.phone}")
+        lines.append(color_text(f"  📌 {contact.name}", fore=Fore.YELLOW, style=Style.BRIGHT))
+        lines.append(color_text(f"     📞 {contact.phone}", fore=Fore.GREEN))
         if contact.email:
-            lines.append(f"     ✉️ {contact.email}")
+            lines.append(color_text(f"     ✉️ {contact.email}", fore=Fore.BLUE))
         if contact.address:
-            lines.append(f"     🏠 {contact.address}")
+            lines.append(color_text(f"     🏠 {contact.address}", fore=Fore.MAGENTA))
         if contact.birthday:
             days = contact.days_to_birthday()
             if days == 0:
-                lines.append("     🎂 СЬОГОДНІ ДЕНЬ НАРОДЖЕННЯ!")
+                lines.append(color_text("     🎂 СЬОГОДНІ ДЕНЬ НАРОДЖЕННЯ!", fore=Fore.RED, style=Style.BRIGHT))
             elif days:
-                lines.append(f"     🎂 До дня народження {days} днів")
+                lines.append(color_text(f"     🎂 До дня народження {days} днів", fore=Fore.CYAN))
     return "\n".join(lines)
