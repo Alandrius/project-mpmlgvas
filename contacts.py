@@ -4,6 +4,8 @@ from validation import (
     validate_phone,
     validate_email,
     validate_birthday,
+    input_error,
+    require_args,
 )
 
 class Contact:
@@ -22,10 +24,17 @@ class Contact:
         
         today = datetime.now().date()
         bday = datetime.strptime(self.birthday, "%Y-%m-%d").date()
-        next_bday = bday.replace(year=today.year)
+        try:
+            next_bday = bday.replace(year=today.year)
+        except ValueError:
+            # Для 29.02 у невисокосний рік беремо 28.02
+            next_bday = bday.replace(year=today.year, day=28)
         
         if next_bday < today:
-            next_bday = next_bday.replace(year=today.year + 1)
+            try:
+                next_bday = next_bday.replace(year=today.year + 1)
+            except ValueError:
+                next_bday = next_bday.replace(year=today.year + 1, day=28)
         
         return (next_bday - today).days
 
@@ -75,85 +84,75 @@ class AddressBook:
         return results
 
 
+@input_error
+@require_args(2, "Потрібно вказати ім'я та телефон. Приклад: add Іван 0501234567", args_index=1)
 def add_contact_handler(book, args):
     """Додавання нового контакту з валідацією"""
-    if len(args) < 2:
-        print("❌ Потрібно вказати ім'я та телефон. Приклад: add Іван 0501234567")
-        return
-    
     name_input = args[0]
     phone_input = args[1]
     
     # Валідація імені
     valid, name = validate_name(name_input)
     if not valid:
-        print(name)
-        return
+        raise ValueError(name)
     
     # Валідація телефону
     valid, phone = validate_phone(phone_input)
     if not valid:
-        print(phone)
-        return
+        raise ValueError(phone)
     
     # Email (необов'язковий)
     email = ""
     if len(args) > 2:
         valid, email = validate_email(args[2])
         if not valid:
-            print(email)
-            return
+            raise ValueError(email)
     
     # День народження (необов'язковий)
     birthday_input = input("День народження (РРРР-ММ-ДД, або Enter щоб пропустити): ")
     valid, birthday = validate_birthday(birthday_input)
     if not valid:
-        print(birthday)
-        return
+        raise ValueError(birthday)
     
     contact = Contact(name, phone=phone, email=email, birthday=birthday)
     book.add_contact(contact)
-    print(f"✅ Контакт {name} додано!")
+    return f"✅ Контакт {name} додано!"
 
+@input_error
+@require_args(1, "Вкажи текст для пошуку. Приклад: search Іван", args_index=1)
 def search_contacts_handler(book, args):
     """Пошук контактів"""
-    if not args:
-        print("❌ Вкажи текст для пошуку. Приклад: search Іван")
-        return
-    
     search_text = " ".join(args)
     results = book.search_contacts(search_text)
     
     if not results:
-        print(f"❌ Нічого не знайдено за запитом '{search_text}'")
-    else:
-        print(f"✅ Знайдено {len(results)} контактів:")
-        for contact in results:
-            print(f"  📌 {contact.name}")
-            print(f"     📞 {contact.phone}")
-            if contact.email:
-                print(f"     ✉️ {contact.email}")
-            if contact.address:
-                print(f"     🏠 {contact.address}")
-            if contact.birthday:
-                days = contact.days_to_birthday()
-                if days == 0:
-                    print("     🎂 СЬОГОДНІ ДЕНЬ НАРОДЖЕННЯ!")
-                elif days:
-                    print(f"     🎂 До дня народження {days} днів")
+        return f"❌ Нічого не знайдено за запитом '{search_text}'"
 
+    lines = [f"✅ Знайдено {len(results)} контактів:"]
+    for contact in results:
+        lines.append(f"  📌 {contact.name}")
+        lines.append(f"     📞 {contact.phone}")
+        if contact.email:
+            lines.append(f"     ✉️ {contact.email}")
+        if contact.address:
+            lines.append(f"     🏠 {contact.address}")
+        if contact.birthday:
+            days = contact.days_to_birthday()
+            if days == 0:
+                lines.append("     🎂 СЬОГОДНІ ДЕНЬ НАРОДЖЕННЯ!")
+            elif days:
+                lines.append(f"     🎂 До дня народження {days} днів")
+    return "\n".join(lines)
+
+@input_error
+@require_args(1, "Вкажи ім'я контакту для редагування. Приклад: edit Іван", args_index=1)
 def edit_contact_handler(book, args):
     """Редагування контакту з валідацією"""
-    if not args:
-        print("❌ Вкажи ім'я контакту для редагування. Приклад: edit Іван")
-        return
-    
     name = " ".join(args)
     contact = book.find_contact(name)
     
     if not contact:
-        print(f"❌ Контакт '{name}' не знайдено")
-        return
+        raise KeyError(f"❌ Контакт '{name}' не знайдено")
     
     print(f"\nРедагуємо контакт: {contact.name}")
     print("(Залиш поле порожнім, щоб не змінювати)")
@@ -165,7 +164,7 @@ def edit_contact_handler(book, args):
         if valid:
             contact.name = result
         else:
-            print(result)
+            raise ValueError(result)
     
     # Редагування телефону
     new_phone = input(f"Телефон [{contact.phone}]: ")
@@ -174,7 +173,7 @@ def edit_contact_handler(book, args):
         if valid:
             contact.phone = result
         else:
-            print(result)
+            raise ValueError(result)
     
     # Редагування email
     new_email = input(f"Email [{contact.email}]: ")
@@ -183,7 +182,7 @@ def edit_contact_handler(book, args):
         if valid:
             contact.email = result
         else:
-            print(result)
+            raise ValueError(result)
     
     # Редагування дня народження
     new_birthday = input(f"День народження [{contact.birthday}]: ")
@@ -192,64 +191,62 @@ def edit_contact_handler(book, args):
         if valid:
             contact.birthday = result
         else:
-            print(result)
+            raise ValueError(result)
     
-    print(f"✅ Контакт оновлено!")
+    return "✅ Контакт оновлено!"
 
+@input_error
+@require_args(1, "Вкажи ім'я контакту для видалення. Приклад: delete Іван", args_index=1)
 def delete_contact_handler(book, args):
     """Видалення контакту"""
-    if not args:
-        print("❌ Вкажи ім'я контакту для видалення. Приклад: delete Іван")
-        return
-    
     name = " ".join(args)
     deleted = book.delete_contact(name)
     
     if deleted:
-        print(f"✅ Контакт '{name}' видалено")
-    else:
-        print(f"❌ Контакт '{name}' не знайдено")
+        return f"✅ Контакт '{name}' видалено"
+    raise KeyError(f"❌ Контакт '{name}' не знайдено")
 
+@input_error
+@require_args(1, "Вкажи кількість днів. Приклад: birthdays 7", args_index=1)
 def show_birthdays_handler(book, args):
     """Показати іменинників"""
-    if not args:
-        print("❌ Вкажи кількість днів. Приклад: birthdays 7")
-        return
-    
     try:
         days = int(args[0])
     except ValueError:
-        print("❌ Вкажи число днів. Приклад: birthdays 7")
-        return
+        raise ValueError("❌ Вкажи число днів. Приклад: birthdays 7")
+    if days < 0:
+        raise ValueError("❌ Кількість днів не може бути від'ємною")
     
     results = book.get_birthdays_in_days(days)
     
     if not results:
-        print(f"📭 Немає іменинників через {days} днів")
-    else:
-        print(f"🎂 Іменинники через {days} днів:")
-        for contact in results:
-            print(f"  {contact.name} - {contact.birthday}")
+        return f"📭 Немає іменинників через {days} днів"
+
+    lines = [f"🎂 Іменинники через {days} днів:"]
+    for contact in results:
+        lines.append(f"  {contact.name} - {contact.birthday}")
+    return "\n".join(lines)
 
 
+@input_error
 def show_all_contacts_handler(book, args):
     """Показати всі контакти"""
     contacts = book.get_all_contacts()
     if not contacts:
-        print("📭 Список контактів порожній")
-        return
+        return "📭 Список контактів порожній"
 
-    print(f"📒 Всього контактів: {len(contacts)}")
+    lines = [f"📒 Всього контактів: {len(contacts)}"]
     for contact in contacts:
-        print(f"  📌 {contact.name}")
-        print(f"     📞 {contact.phone}")
+        lines.append(f"  📌 {contact.name}")
+        lines.append(f"     📞 {contact.phone}")
         if contact.email:
-            print(f"     ✉️ {contact.email}")
+            lines.append(f"     ✉️ {contact.email}")
         if contact.address:
-            print(f"     🏠 {contact.address}")
+            lines.append(f"     🏠 {contact.address}")
         if contact.birthday:
             days = contact.days_to_birthday()
             if days == 0:
-                print("     🎂 СЬОГОДНІ ДЕНЬ НАРОДЖЕННЯ!")
+                lines.append("     🎂 СЬОГОДНІ ДЕНЬ НАРОДЖЕННЯ!")
             elif days:
-                print(f"     🎂 До дня народження {days} днів")
+                lines.append(f"     🎂 До дня народження {days} днів")
+    return "\n".join(lines)

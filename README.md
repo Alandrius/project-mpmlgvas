@@ -15,3 +15,26 @@
 
 - **`validation.py`**
   - **`input_error`**: декоратор для обробки помилок.
+
+### Run unit tests
+
+Project has basic unit tests for main flows in:
+
+- `tests/test_validation.py`
+- `tests/test_contacts.py`
+- `tests/test_notes.py`
+
+Run all tests:
+
+```bash
+# from project root
+python3 -m unittest discover -s tests -p "test_*.py"
+```
+
+Run one file (example):
+
+```bash
+python3 -m unittest tests/test_contacts.py
+```
+
+Expected result: all tests pass (`OK`).
