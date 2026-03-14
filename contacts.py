@@ -12,7 +12,11 @@ try:
     from colorama import Fore, Style, init as colorama_init
     colorama_init(autoreset=True)
 except ImportError:
-    Fore = Style = None
+    class _ColorFallback:
+        def __getattr__(self, name):
+            return ""
+
+    Fore = Style = _ColorFallback()
 
 
 def color_text(text: str, fore=None, back=None, style=None) -> str:
@@ -99,12 +103,11 @@ class AddressBook:
     
     def get_birthdays_in_days(self, days):
         results = []
-        target_date = datetime.now().date() + timedelta(days=days)
-        
+
         for contact in self.contacts:
             if contact.birthday:
                 days_to = contact.days_to_birthday()
-                if days_to == days:
+                if days_to is not None and days_to <= days:
                     results.append(contact)
         return results
 
@@ -210,7 +213,7 @@ def edit_contact_handler(book, args):
             raise ValueError(result)
     
     # Редагування дня народження
-    current_bday = contact.birthday.isoformat() if contact.birthday else ""
+    current_bday = str(contact.birthday) if contact.birthday else ""
     new_birthday = input(f"День народження [{current_bday}]: ")
     if new_birthday:
         valid, result = validate_birthday(new_birthday)
@@ -246,9 +249,9 @@ def show_birthdays_handler(book, args):
     results = book.get_birthdays_in_days(days)
 
     if not results:
-        return color_text(f"📭 Немає іменинників через {days} днів", fore=Fore.YELLOW)
+        return color_text(f"📭 Немає іменинників у наступні {days} днів", fore=Fore.YELLOW)
 
-    lines = [color_text(f"🎂 Іменинники через {days} днів:", fore=Fore.CYAN, style=Style.BRIGHT)]
+    lines = [color_text(f"🎂 Іменинники у наступні {days} днів:", fore=Fore.CYAN, style=Style.BRIGHT)]
     for contact in results:
         lines.append(color_text(f"  {contact.name} - {contact.birthday}", fore=Fore.YELLOW))
     return "\n".join(lines)

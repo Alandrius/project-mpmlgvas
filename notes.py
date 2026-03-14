@@ -1,5 +1,6 @@
 from datetime import datetime
 from collections import UserDict
+from typing import Optional
 from validation import (
     input_error,
     require_args,
@@ -10,7 +11,7 @@ from validation import (
 
 
 class Note:
-    def __init__(self, title: str, text: str, tags: list[str] | None = None):
+    def __init__(self, title: str, text: str, tags: Optional[list[str]] = None):
         valid, clean_title = validate_note_title(title)
         if not valid:
             raise ValueError(clean_title)
@@ -176,7 +177,7 @@ def edit_note_handler(notebook: NoteBook, args: list) -> str:
     return f"✅ Нотатку '{note.title}' оновлено."
 
 @input_error
-@require_args(1, "Використання: delete-note <назва>", args_index=0)
+@require_args(1, "Використання: delete-note <назва>", args_index=1)
 def delete_note_handler(notebook: NoteBook, args: list) -> str:
     title = " ".join(args)
     notebook.delete_note(title)
@@ -210,7 +211,7 @@ def remove_tag_handler(notebook: NoteBook, args: list) -> str:
     return f"✅ Тег '{tag}' видалено з '{note.title}'."
 
 @input_error
-@require_args(1, "Використання: search-note <запит>", args_index=0)
+@require_args(1, "Використання: search-note <запит>", args_index=1)
 def search_by_title_handler(notebook: NoteBook, args: list):
     query = " ".join(args)
     results = notebook.search_by_title(query)
@@ -219,7 +220,7 @@ def search_by_title_handler(notebook: NoteBook, args: list):
     return results
 
 @input_error
-@require_args(1, "Використання: search-tag <тег>", args_index=0)
+@require_args(1, "Використання: search-tag <тег>", args_index=1)
 def search_by_tag_handler(notebook: NoteBook, args: list):
     tag = args[0]
     results = notebook.search_by_tag(tag)

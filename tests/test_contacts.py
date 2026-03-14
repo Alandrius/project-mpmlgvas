@@ -43,6 +43,14 @@ class TestContacts(unittest.TestCase):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0].name, "BirthdayPerson")
 
+    def test_get_birthdays_in_days_returns_upcoming_range(self):
+        today = date.today().strftime("%Y-%m-%d")
+        self.book.add_contact(Contact("A", phone="+380501234567", birthday=today))
+        self.book.add_contact(Contact("B", phone="+380671111111", birthday="2000-12-31"))
+
+        results = self.book.get_birthdays_in_days(380)
+        self.assertGreaterEqual(len(results), 2)
+
     def test_days_to_birthday_handles_leap_day(self):
         leap_contact = Contact("Leap", birthday="2000-02-29")
         days = leap_contact.days_to_birthday()
