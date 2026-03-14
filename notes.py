@@ -131,6 +131,7 @@ class NoteBook(UserDict):
         return [note for note in self.data.values() if q in note.title.lower()]
 
     def search_by_tag(self, tag: str) -> list[Note]:
+        # Нотатки з тегами — перші (відсортовані за першим тегом), без тегів — в кінці
         t = tag.strip().lower()
         return [note for note in self.data.values() if t in note.tags]
 
@@ -148,8 +149,10 @@ class NoteBook(UserDict):
         without_tags = [n for n in self.data.values() if not n.tags]
         return with_tags + without_tags
 
+# Обробники команд
 @input_error
 def add_note_handler(notebook: NoteBook, args: list) -> str:
+    """Додає нотатку. Якщо args порожній, запитує назву та текст у користувача."""
     if not args:
         title = input("Назва нотатки: ").strip()
         text = input("Текст нотатки: ").strip()
@@ -161,6 +164,7 @@ def add_note_handler(notebook: NoteBook, args: list) -> str:
 
 @input_error
 def edit_note_handler(notebook: NoteBook, args: list) -> str:
+    """Редагує нотатку. Якщо args порожній, запитує назву та текст у користувача."""
     if not args:
         title = input("Назва нотатки для редагування: ").strip()
     else:
@@ -178,6 +182,7 @@ def delete_note_handler(notebook: NoteBook, args: list) -> str:
 
 @input_error
 def add_tags_handler(notebook: NoteBook, args: list) -> str:
+    """Додає теги до нотатки. Якщо args порожній, запитує назву та текст у користувача."""
     if not args:
         title = input("Назва нотатки: ").strip()
     else:
@@ -191,6 +196,7 @@ def add_tags_handler(notebook: NoteBook, args: list) -> str:
 
 @input_error
 def remove_tag_handler(notebook: NoteBook, args: list) -> str:
+    """Видаляє тег з нотатки. Якщо args порожній, запитує назву та текст у користувача."""
     if not args:
         title = input("Назва нотатки: ").strip()
     else:
