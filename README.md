@@ -88,3 +88,5 @@ If you want those features, install them with:
 ```bash
 pip install colorama tabulate
 ```
+
+To build executable file run build_executable_unix.sh or build_executable.bat depending on your operation sustem.
