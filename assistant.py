@@ -35,59 +35,196 @@ def parse_input(user_input: str):
 def main() -> None:
     book = AddressBook()
     notebook = NoteBook()
+
+    commands = {
+        'add': {
+            'aliases': ['add-contact'],
+            'handler': add_contact_handler,
+            'object': book,
+            'description': {
+                'example': 'add / add-contact [ім\'я] [телефон] [email]',
+                'description': 'додати контакт'
+            }
+        },
+        'search': {
+            'aliases': ['search-contact'],
+            'handler': search_contacts_handler,
+            'object': book,
+            'description': {
+                'example': 'search / search-contact [текст]',
+                'description': 'пошук контактів'
+            }
+        },
+        'edit': {
+            'aliases': ['edit-contact'],
+            'handler': edit_contact_handler,
+            'object': book,
+            'description': {
+                'example': 'edit / edit-contact [ім\'я]',
+                'description': 'редагувати контакт'
+            }
+        },
+        'delete': {
+            'aliases': ['delete-contact'],
+            'handler': delete_contact_handler,
+            'object': book,
+            'description': {
+                'example': 'delete / delete-contact [ім\'я]',
+                'description': 'видалити контакт'
+            }
+        },
+        'birthdays': {
+            'aliases': ['bday'],
+            'handler': show_birthdays_handler,
+            'object': book,
+            'description': {
+                'example': 'birthdays / bday [дні]',
+                'description': 'список іменинників'
+            }
+        },
+        'show-all': {
+            'aliases': ['show-all-contacts', 'contacts', 'list'],
+            'handler': show_all_contacts_handler,
+            'object': book,
+            'description': {
+                'example': 'show-all / show-all-contacts / contacts / list',
+                'description': 'показати всі контакти'
+            }
+        },
+        'add-note': {
+            'aliases': [],
+            'handler': add_note_handler,
+            'object': notebook,
+            'description': {
+                'example': 'add-note [назва] [текст]',
+                'description': 'додати нотатку'
+            }
+        },
+        'edit-note': {
+            'aliases': [],
+            'handler': edit_note_handler,
+            'object': notebook,
+            'description': {
+                'example': 'edit-note [назва] [новий текст]',
+                'description': 'редагувати нотатку'
+            }
+        },
+        'delete-note': {
+            'aliases': [],
+            'handler': delete_note_handler,
+            'object': notebook,
+            'description': {
+                'example': 'delete-note [назва]',
+                'description': 'видалити нотатку'
+            }
+        },
+        'add-tags': {
+            'aliases': [],
+            'handler': add_tags_handler,
+            'object': notebook,
+            'description': {
+                'example': 'add-tags [назва] [тег1] [тег2] ...',
+                'description': 'додати теги'
+            }
+        },
+        'remove-tag': {
+            'aliases': [],
+            'handler': remove_tag_handler,
+            'object': notebook,
+            'description': {
+                'example': 'remove-tag [назва] [тег]',
+                'description': 'видалити тег'
+            }
+        },
+        'all-notes': {
+            'aliases': [],
+            'handler': all_notes_handler,
+            'object': notebook,
+            'description': {
+                'example': 'all-notes',
+                'description': 'показати всі нотатки'
+            }
+        },
+        'search-note': {
+            'aliases': [],
+            'handler': search_by_title_handler,
+            'object': notebook,
+            'description': {
+                'example': 'search-note [запит]',
+                'description': 'пошук нотаток за назвою'
+            }
+        },
+        'search-tag': {
+            'aliases': [],
+            'handler': search_by_tag_handler,
+            'object': notebook,
+            'description': {
+                'example': 'search-tag [тег]',
+                'description': 'пошук нотаток за тегом'
+            }
+        },
+        'sort-notes-title': {
+            'aliases': [],
+            'handler': sort_by_title_handler,
+            'object': notebook,
+            'description': {
+                'example': 'sort-notes-title',
+                'description': 'сортувати нотатки за назвою'
+            }
+        },
+        'sort-notes-date': {
+            'aliases': [],
+            'handler': sort_by_date_handler,
+            'object': notebook,
+            'description': {
+                'example': 'sort-notes-date',
+                'description': 'сортувати нотатки за датою'
+            }
+        },
+        'sort-notes-tag': {
+            'aliases': [],
+            'handler': sort_by_tag_handler,
+            'object': notebook,
+            'description': {
+                'example': 'sort-notes-tag',
+                'description': 'сортувати нотатки за тегом'
+            }
+        },
+        'close': {
+            'aliases': ['exit'],
+            'handler': None,  # special case
+            'object': None,
+            'description': {
+                'example': 'close / exit',
+                'description': 'вихід'
+            }
+        }
+    }
+
+    # Build registry
+    registry = {}
+    for cmd, info in commands.items():
+        for alias in [cmd] + info['aliases']:
+            registry[alias] = info
+
     print("Welcome to the assistant bot!")
     print("Доступні команди:")
-    print("  add / add-contact [ім'я] [телефон] [email]   - додати контакт")
-    print("  search / search-contact [текст]              - пошук контактів")
-    print("  edit / edit-contact [ім'я]                   - редагувати контакт")
-    print("  delete / delete-contact [ім'я]               - видалити контакт")
-    print("  birthdays / bday [дні]                       - список іменинників")
-    print("  show-all / show-all-contacts / contacts               - показати всі контакти")
-    print("  exit                                          - вихід")
+    for cmd, info in commands.items():
+        desc = info['description']
+        print(f"  {desc['example']} - {desc['description']}")
+    print()
     
     while True:
         user_input = input("\nEnter a command: ")
         command, args = parse_input(user_input)
 
-        if command in ["close", "exit"]:
-            print("Good bye!")
-            break
-        elif command in ["add", "add-contact"]:
-            print(add_contact_handler(book, args))
-        elif command in ["search", "search-contact"]:
-            print(search_contacts_handler(book, args))
-        elif command in ["edit", "edit-contact"]:
-            print(edit_contact_handler(book, args))
-        elif command in ["delete", "delete-contact"]:
-            print(delete_contact_handler(book, args))
-        elif command in ["birthdays", "bday"]:
-            print(show_birthdays_handler(book, args))
-        elif command in ["show-all", "show-all-contacts", "contacts", "list"]:
-            print(show_all_contacts_handler(book, args))
-        
-        elif command == "add-note":
-            print(add_note_handler(args, notebook))
-        elif command == "edit-note":
-            print(edit_note_handler(args, notebook))
-        elif command == "delete-note":
-            print(delete_note_handler(args, notebook))
-        elif command == "add-tags":
-            print(add_tags_handler(args, notebook))
-        elif command == "remove-tag":
-            print(remove_tag_handler(args, notebook))
-        elif command == "all-notes":
-            print(all_notes_handler(notebook))
-        elif command == "search-note":
-            print(search_by_title_handler(args, notebook))
-        elif command == "search-tag":
-            print(search_by_tag_handler(args, notebook))
-        elif command == "sort-notes-title":
-            print(sort_by_title_handler(notebook))
-        elif command == "sort-notes-date":
-            print(sort_by_date_handler(notebook))
-        elif command == "sort-notes-tag":
-            print(sort_by_tag_handler(notebook))
-
+        if command in registry:
+            info = registry[command]
+            if info['handler'] is None:  # exit command
+                print("Good bye!")
+                break
+            else:
+                print(info['handler'](info['object'], args))
         else:
             print("❌ Невідома команда")
 
