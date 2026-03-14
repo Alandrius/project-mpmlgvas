@@ -8,6 +8,30 @@ from validation import (
     require_args,
 )
 
+try:
+    from colorama import Fore, Style, init as colorama_init
+    colorama_init(autoreset=True)
+except ImportError:
+    Fore = Style = None
+
+
+def color_text(text: str, fore=None, back=None, style=None) -> str:
+    """Wrap text with colorama codes if available."""
+    if Fore is None or Style is None:
+        return text
+
+    parts = []
+    if style:
+        parts.append(style)
+    if fore:
+        parts.append(fore)
+    if back:
+        parts.append(back)
+
+    parts.append(text)
+    parts.append(Style.RESET_ALL)
+    return "".join(parts)
+
 
 class Contact:
     """Клас для одного контакту"""
@@ -129,20 +153,20 @@ def search_contacts_handler(book, args):
     if not results:
         return f"❌ Нічого не знайдено за запитом '{search_text}'"
 
-    lines = [f"✅ Знайдено {len(results)} контактів:"]
+    lines = [color_text(f"✅ Знайдено {len(results)} контактів:", fore=Fore.GREEN, style=Style.BRIGHT)]
     for contact in results:
-        lines.append(f"  📌 {contact.name}")
-        lines.append(f"     📞 {contact.phone}")
+        lines.append(color_text(f"  📌 {contact.name}", fore=Fore.YELLOW, style=Style.BRIGHT))
+        lines.append(color_text(f"     📞 {contact.phone}", fore=Fore.GREEN))
         if contact.email:
-            lines.append(f"     ✉️ {contact.email}")
+            lines.append(color_text(f"     ✉️ {contact.email}", fore=Fore.BLUE))
         if contact.address:
-            lines.append(f"     🏠 {contact.address}")
+            lines.append(color_text(f"     🏠 {contact.address}", fore=Fore.MAGENTA))
         if contact.birthday:
             days = contact.days_to_birthday()
             if days == 0:
-                lines.append("     🎂 СЬОГОДНІ ДЕНЬ НАРОДЖЕННЯ!")
+                lines.append(color_text("     🎂 СЬОГОДНІ ДЕНЬ НАРОДЖЕННЯ!", fore=Fore.RED, style=Style.BRIGHT))
             elif days:
-                lines.append(f"     🎂 До дня народження {days} днів")
+                lines.append(color_text(f"     🎂 До дня народження {days} днів", fore=Fore.CYAN))
     return "\n".join(lines)
 
 @input_error
@@ -222,11 +246,11 @@ def show_birthdays_handler(book, args):
     results = book.get_birthdays_in_days(days)
 
     if not results:
-        return f"📭 Немає іменинників через {days} днів"
+        return color_text(f"📭 Немає іменинників через {days} днів", fore=Fore.YELLOW)
 
-    lines = [f"🎂 Іменинники через {days} днів:"]
+    lines = [color_text(f"🎂 Іменинники через {days} днів:", fore=Fore.CYAN, style=Style.BRIGHT)]
     for contact in results:
-        lines.append(f"  {contact.name} - {contact.birthday}")
+        lines.append(color_text(f"  {contact.name} - {contact.birthday}", fore=Fore.YELLOW))
     return "\n".join(lines)
 
 
@@ -235,20 +259,20 @@ def show_all_contacts_handler(book, args):
     """Показати всі контакти"""
     contacts = book.get_all_contacts()
     if not contacts:
-        return "📭 Список контактів порожній"
+        return color_text("📭 Список контактів порожній", fore=Fore.YELLOW)
 
-    lines = [f"📒 Всього контактів: {len(contacts)}"]
+    lines = [color_text(f"📒 Всього контактів: {len(contacts)}", fore=Fore.CYAN, style=Style.BRIGHT)]
     for contact in contacts:
-        lines.append(f"  📌 {contact.name}")
-        lines.append(f"     📞 {contact.phone}")
+        lines.append(color_text(f"  📌 {contact.name}", fore=Fore.YELLOW, style=Style.BRIGHT))
+        lines.append(color_text(f"     📞 {contact.phone}", fore=Fore.GREEN))
         if contact.email:
-            lines.append(f"     ✉️ {contact.email}")
+            lines.append(color_text(f"     ✉️ {contact.email}", fore=Fore.BLUE))
         if contact.address:
-            lines.append(f"     🏠 {contact.address}")
+            lines.append(color_text(f"     🏠 {contact.address}", fore=Fore.MAGENTA))
         if contact.birthday:
             days = contact.days_to_birthday()
             if days == 0:
-                lines.append("     🎂 СЬОГОДНІ ДЕНЬ НАРОДЖЕННЯ!")
+                lines.append(color_text("     🎂 СЬОГОДНІ ДЕНЬ НАРОДЖЕННЯ!", fore=Fore.RED, style=Style.BRIGHT))
             elif days:
-                lines.append(f"     🎂 До дня народження {days} днів")
+                lines.append(color_text(f"     🎂 До дня народження {days} днів", fore=Fore.CYAN))
     return "\n".join(lines)

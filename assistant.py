@@ -336,22 +336,32 @@ def main() -> None:
     print_help(commands)
 
     while True:
-        user_input = input("\nEnter a command: ")
-        command, args = parse_input(user_input)
+        print(color_text("\nEnter a command: ", fore=Fore.YELLOW), end="")
+        command, args = parse_input(input())
 
         if command in registry:
             info = registry[command]
             if info['handler'] is None:  # exit command
-                print("Good bye!")
+                print(color_text("Good bye!", fore=Fore.GREEN))
                 break
             else:
                 result = info['handler'](info['object'], args)
                 if isinstance(result, list):
                     print(format_notes_table(result))
                 else:
-                    print(result)
+                    if isinstance(result, str):
+                        if result.startswith("❌"):
+                            print(color_text(result, fore=Fore.RED))
+                        elif result.startswith("✅"):
+                            print(color_text(result, fore=Fore.GREEN))
+                        elif result.startswith("📭"):
+                            print(color_text(result, fore=Fore.YELLOW))
+                        else:
+                            print(result)
+                    else:
+                        print(result)
         else:
-            print("❌ Невідома команда")
+            print(color_text("❌ Невідома команда", fore=Fore.RED))
 
             
 if __name__ == "__main__":
