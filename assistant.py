@@ -1,3 +1,5 @@
+from enum import Enum
+
 from contacts import (
     AddressBook,
     add_contact_handler,
@@ -22,6 +24,41 @@ from notes import (
     all_notes_handler,
 )
 
+try:
+    from tabulate import tabulate
+except ImportError:
+    tabulate = None
+
+try:
+    from colorama import Back, Fore, Style, init as colorama_init
+    colorama_init(autoreset=True)
+except ImportError:
+    Back = Fore = Style = None
+
+
+class CommandCategory(Enum):
+    CONTACTS = "Contacts"
+    NOTES = "Notes"
+    OTHER = "Other"
+
+
+def color_text(text: str, fore=None, back=None, style=None) -> str:
+    """Wrap text with colorama codes if available."""
+    if Fore is None or Style is None:
+        return text
+
+    parts = []
+    if style:
+        parts.append(style)
+    if fore:
+        parts.append(fore)
+    if back:
+        parts.append(back)
+
+    parts.append(text)
+    parts.append(Style.RESET_ALL)
+    return "".join(parts)
+
 
 def parse_input(user_input: str):
     parts = user_input.strip().split()
@@ -30,6 +67,47 @@ def parse_input(user_input: str):
     command = parts[0].lower()
     args = parts[1:]
     return command, args
+
+
+def format_help_table(commands_by_category) -> str:
+    """Format help output with tabulate if available."""
+    lines = []
+
+    for category, items in commands_by_category.items():
+        category_text = category.value if isinstance(category, CommandCategory) else str(category)
+        header = color_text(category_text, fore=Fore.CYAN, style=Style.BRIGHT)
+        lines.append(header)
+
+        table_data = []
+        for item in items:
+            example = item['help']['example']
+            description = item['help']['description']
+            table_data.append([example, description])
+
+        if tabulate:
+            header_cmd = color_text("Command", fore=Fore.WHITE, back=Back.BLUE, style=Style.BRIGHT)
+            header_desc = color_text("Description", fore=Fore.WHITE, back=Back.BLUE, style=Style.BRIGHT)
+            lines.append(
+                tabulate(table_data, headers=[header_cmd, header_desc], tablefmt="plain")
+            )
+        else:
+            for example, description in table_data:
+                lines.append(f"  {example} - {description}")
+
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def print_help(commands) -> None:
+    """Print the help section grouped by category."""
+    categories = {}
+    for info in commands.values():
+        category = info.get('category', CommandCategory.OTHER)
+        categories.setdefault(category, []).append(info)
+
+    print("Welcome to the assistant bot!")
+    print(format_help_table(categories))
 
 
 def main() -> None:
@@ -41,7 +119,8 @@ def main() -> None:
             'aliases': ['add-contact'],
             'handler': add_contact_handler,
             'object': book,
-            'description': {
+            'category': CommandCategory.CONTACTS,
+            'help': {
                 'example': 'add / add-contact [ім\'я] [телефон] [email]',
                 'description': 'додати контакт'
             }
@@ -50,7 +129,8 @@ def main() -> None:
             'aliases': ['search-contact'],
             'handler': search_contacts_handler,
             'object': book,
-            'description': {
+            'category': CommandCategory.CONTACTS,
+            'help': {
                 'example': 'search / search-contact [текст]',
                 'description': 'пошук контактів'
             }
@@ -59,7 +139,8 @@ def main() -> None:
             'aliases': ['edit-contact'],
             'handler': edit_contact_handler,
             'object': book,
-            'description': {
+            'category': CommandCategory.CONTACTS,
+            'help': {
                 'example': 'edit / edit-contact [ім\'я]',
                 'description': 'редагувати контакт'
             }
@@ -68,7 +149,8 @@ def main() -> None:
             'aliases': ['delete-contact'],
             'handler': delete_contact_handler,
             'object': book,
-            'description': {
+            'category': CommandCategory.CONTACTS,
+            'help': {
                 'example': 'delete / delete-contact [ім\'я]',
                 'description': 'видалити контакт'
             }
@@ -77,7 +159,8 @@ def main() -> None:
             'aliases': ['bday'],
             'handler': show_birthdays_handler,
             'object': book,
-            'description': {
+            'category': CommandCategory.CONTACTS,
+            'help': {
                 'example': 'birthdays / bday [дні]',
                 'description': 'список іменинників'
             }
@@ -86,7 +169,8 @@ def main() -> None:
             'aliases': ['show-all-contacts', 'contacts', 'list'],
             'handler': show_all_contacts_handler,
             'object': book,
-            'description': {
+            'category': CommandCategory.CONTACTS,
+            'help': {
                 'example': 'show-all / show-all-contacts / contacts / list',
                 'description': 'показати всі контакти'
             }
@@ -95,7 +179,8 @@ def main() -> None:
             'aliases': [],
             'handler': add_note_handler,
             'object': notebook,
-            'description': {
+            'category': CommandCategory.NOTES,
+            'help': {
                 'example': 'add-note [назва] [текст]',
                 'description': 'додати нотатку'
             }
@@ -104,7 +189,8 @@ def main() -> None:
             'aliases': [],
             'handler': edit_note_handler,
             'object': notebook,
-            'description': {
+            'category': CommandCategory.NOTES,
+            'help': {
                 'example': 'edit-note [назва] [новий текст]',
                 'description': 'редагувати нотатку'
             }
@@ -113,7 +199,8 @@ def main() -> None:
             'aliases': [],
             'handler': delete_note_handler,
             'object': notebook,
-            'description': {
+            'category': CommandCategory.NOTES,
+            'help': {
                 'example': 'delete-note [назва]',
                 'description': 'видалити нотатку'
             }
@@ -122,7 +209,8 @@ def main() -> None:
             'aliases': [],
             'handler': add_tags_handler,
             'object': notebook,
-            'description': {
+            'category': CommandCategory.NOTES,
+            'help': {
                 'example': 'add-tags [назва] [тег1] [тег2] ...',
                 'description': 'додати теги'
             }
@@ -131,7 +219,8 @@ def main() -> None:
             'aliases': [],
             'handler': remove_tag_handler,
             'object': notebook,
-            'description': {
+            'category': CommandCategory.NOTES,
+            'help': {
                 'example': 'remove-tag [назва] [тег]',
                 'description': 'видалити тег'
             }
@@ -140,7 +229,8 @@ def main() -> None:
             'aliases': [],
             'handler': all_notes_handler,
             'object': notebook,
-            'description': {
+            'category': CommandCategory.NOTES,
+            'help': {
                 'example': 'all-notes',
                 'description': 'показати всі нотатки'
             }
@@ -149,7 +239,8 @@ def main() -> None:
             'aliases': [],
             'handler': search_by_title_handler,
             'object': notebook,
-            'description': {
+            'category': CommandCategory.NOTES,
+            'help': {
                 'example': 'search-note [запит]',
                 'description': 'пошук нотаток за назвою'
             }
@@ -158,7 +249,8 @@ def main() -> None:
             'aliases': [],
             'handler': search_by_tag_handler,
             'object': notebook,
-            'description': {
+            'category': CommandCategory.NOTES,
+            'help': {
                 'example': 'search-tag [тег]',
                 'description': 'пошук нотаток за тегом'
             }
@@ -167,7 +259,8 @@ def main() -> None:
             'aliases': [],
             'handler': sort_by_title_handler,
             'object': notebook,
-            'description': {
+            'category': CommandCategory.NOTES,
+            'help': {
                 'example': 'sort-notes-title',
                 'description': 'сортувати нотатки за назвою'
             }
@@ -176,7 +269,8 @@ def main() -> None:
             'aliases': [],
             'handler': sort_by_date_handler,
             'object': notebook,
-            'description': {
+            'category': CommandCategory.NOTES,
+            'help': {
                 'example': 'sort-notes-date',
                 'description': 'сортувати нотатки за датою'
             }
@@ -185,7 +279,8 @@ def main() -> None:
             'aliases': [],
             'handler': sort_by_tag_handler,
             'object': notebook,
-            'description': {
+            'category': CommandCategory.NOTES,
+            'help': {
                 'example': 'sort-notes-tag',
                 'description': 'сортувати нотатки за тегом'
             }
@@ -194,7 +289,8 @@ def main() -> None:
             'aliases': ['exit'],
             'handler': None,  # special case
             'object': None,
-            'description': {
+            'category': CommandCategory.OTHER,
+            'help': {
                 'example': 'close / exit',
                 'description': 'вихід'
             }
@@ -207,13 +303,8 @@ def main() -> None:
         for alias in [cmd] + info['aliases']:
             registry[alias] = info
 
-    print("Welcome to the assistant bot!")
-    print("Доступні команди:")
-    for cmd, info in commands.items():
-        desc = info['description']
-        print(f"  {desc['example']} - {desc['description']}")
-    print()
-    
+    print_help(commands)
+
     while True:
         user_input = input("\nEnter a command: ")
         command, args = parse_input(user_input)
