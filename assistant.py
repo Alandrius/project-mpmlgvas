@@ -225,7 +225,7 @@ def main() -> None:
             'object': notebook,
             'category': CommandCategory.NOTES,
             'help': {
-                'example': 'edit-note [назва] [новий текст]',
+                'example': 'edit-note',
                 'description': 'редагувати нотатку'
             }
         },
@@ -245,7 +245,7 @@ def main() -> None:
             'object': notebook,
             'category': CommandCategory.NOTES,
             'help': {
-                'example': 'add-tags [назва] [тег1] [тег2] ...',
+                'example': 'add-tags',
                 'description': 'додати теги'
             }
         },
@@ -255,7 +255,7 @@ def main() -> None:
             'object': notebook,
             'category': CommandCategory.NOTES,
             'help': {
-                'example': 'remove-tag [назва] [тег]',
+                'example': 'remove-tag',
                 'description': 'видалити тег'
             }
         },
