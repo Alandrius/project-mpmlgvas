@@ -23,6 +23,7 @@ from notes import (
     sort_by_tag_handler,
     all_notes_handler,
 )
+from data_management import load_data, save_data
 
 try:
     from tabulate import tabulate
@@ -33,7 +34,11 @@ try:
     from colorama import Back, Fore, Style, init as colorama_init
     colorama_init(autoreset=True)
 except ImportError:
-    Back = Fore = Style = None
+    class _ColorFallback:
+        def __getattr__(self, name):
+            return ""
+
+    Back = Fore = Style = _ColorFallback()
 
 
 class CommandCategory(Enum):
@@ -141,8 +146,7 @@ def print_help(commands) -> None:
 
 
 def main() -> None:
-    book = AddressBook()
-    notebook = NoteBook()
+    book, notebook = load_data()
 
     commands = {
         'add': {
@@ -342,6 +346,7 @@ def main() -> None:
         if command in registry:
             info = registry[command]
             if info['handler'] is None:  # exit command
+                save_data(book, notebook)
                 print(color_text("Good bye!", fore=Fore.GREEN))
                 break
             else:

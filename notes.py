@@ -1,5 +1,6 @@
 from datetime import datetime
 from collections import UserDict
+from typing import Optional
 from validation import (
     input_error,
     require_args,
@@ -10,7 +11,7 @@ from validation import (
 
 
 class Note:
-    def __init__(self, title: str, text: str, tags: list[str] | None = None):
+    def __init__(self, title: str, text: str, tags: Optional[list[str]] = None):
         valid, clean_title = validate_note_title(title)
         if not valid:
             raise ValueError(clean_title)
@@ -62,7 +63,7 @@ class Note:
         )
 
 class NoteBook(UserDict):
-    def add_note(self, title: str, text: str, tags: list[str] | None = None) -> Note:
+    def add_note(self, title: str, text: str, tags: Optional[list[str]] = None) -> Note:
         valid, clean_title = validate_note_title(title)
         if not valid:
             raise ValueError(clean_title)
@@ -165,7 +166,7 @@ def add_note_handler(notebook: NoteBook, args: list) -> str:
     
 # Обробник команди edit-note
 @input_error
-@require_args(2, "Використання: edit-note <назва> <новий текст>", args_index=0)
+@require_args(2, "Використання: edit-note <назва> <новий текст>", args_index=1)
 def edit_note_handler(notebook: NoteBook, args: list) -> str:
     title = args[0]
     new_text = " ".join(args[1:])
@@ -174,7 +175,7 @@ def edit_note_handler(notebook: NoteBook, args: list) -> str:
 
 # Обробник команди delete-note
 @input_error
-@require_args(1, "Використання: delete-note <назва>", args_index=0)
+@require_args(1, "Використання: delete-note <назва>", args_index=1)
 def delete_note_handler(notebook: NoteBook, args: list) -> str:
     title = args[0]
     notebook.delete_note(title)
@@ -182,7 +183,7 @@ def delete_note_handler(notebook: NoteBook, args: list) -> str:
     
 # Обробник команди add-tags
 @input_error
-@require_args(2, "Використання: add-tags <назва нотатки> <тег1> <тег2> ...", args_index=0)
+@require_args(2, "Використання: add-tags <назва нотатки> <тег1> <тег2> ...", args_index=1)
 def add_tags_handler(notebook: NoteBook, args: list) -> str:
     title = args[0]
     tags = args[1:]
@@ -191,7 +192,7 @@ def add_tags_handler(notebook: NoteBook, args: list) -> str:
 
 # Обробник команди remove_tag
 @input_error
-@require_args(2, "Використання: remove-tag <назва нотатки> <тег>", args_index=0)
+@require_args(2, "Використання: remove-tag <назва нотатки> <тег>", args_index=1)
 def remove_tag_handler(notebook: NoteBook, args: list) -> str:
     title = args[0]
     tag = args[1]
@@ -200,7 +201,7 @@ def remove_tag_handler(notebook: NoteBook, args: list) -> str:
     
 # Обробник команди search_by_title
 @input_error
-@require_args(1, "Використання: search-note <запит>", args_index=0)
+@require_args(1, "Використання: search-note <запит>", args_index=1)
 def search_by_title_handler(notebook: NoteBook, args: list):
     query = " ".join(args)
     results = notebook.search_by_title(query)
@@ -210,7 +211,7 @@ def search_by_title_handler(notebook: NoteBook, args: list):
 
 # Обробник команди search_by_tag
 @input_error
-@require_args(1, "Використання: search-tag <тег>", args_index=0)
+@require_args(1, "Використання: search-tag <тег>", args_index=1)
 def search_by_tag_handler(notebook: NoteBook, args: list):
     tag = args[0]
     results = notebook.search_by_tag(tag)
