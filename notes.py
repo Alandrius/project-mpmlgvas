@@ -151,10 +151,15 @@ class NoteBook(UserDict):
     
 # Обробник команди add-note
 @input_error
-@require_args(2, "Використання: add-note <назва> <текст>", args_index=0)
 def add_note_handler(notebook: NoteBook, args: list) -> str:
-    title = args[0]
-    text = " ".join(args[1:])
+    """Додає нотатку. Якщо args порожній, запитує назву та текст у користувача."""
+    if not args:
+        title = input("Назва нотатки: ").strip()
+        text = input("Текст нотатки: ").strip()
+    else:
+        title = args[0]
+        text = " ".join(args[1:])
+
     note = notebook.add_note(title, text)
     return f"✅ Нотатку '{note.title}' додано."
     

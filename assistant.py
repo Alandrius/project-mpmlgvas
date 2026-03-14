@@ -181,8 +181,8 @@ def main() -> None:
             'object': notebook,
             'category': CommandCategory.NOTES,
             'help': {
-                'example': 'add-note [назва] [текст]',
-                'description': 'додати нотатку'
+                'example': 'add-note',
+                'description': 'додати нотатку (буде запропоновано ввести назву та текст)'
             }
         },
         'edit-note': {
