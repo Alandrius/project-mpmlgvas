@@ -60,6 +60,36 @@ def color_text(text: str, fore=None, back=None, style=None) -> str:
     return "".join(parts)
 
 
+def format_notes_table(notes):
+    """Format a list of notes into a table using tabulate."""
+    if not notes:
+        return "📭 Нотаток ще немає."
+
+    table_data = []
+    for note in notes:
+        tags_str = ", ".join(note.tags) if note.tags else "—"
+        created = note.created_at.strftime('%d.%m.%Y %H:%M')
+        updated = note.updated_at.strftime('%d.%m.%Y %H:%M')
+        table_data.append([note.title, note.text, tags_str, created, updated])
+
+    if tabulate:
+        headers = [
+            color_text("Назва", fore=Fore.WHITE, back=Back.BLUE, style=Style.BRIGHT),
+            color_text("Текст", fore=Fore.WHITE, back=Back.BLUE, style=Style.BRIGHT),
+            color_text("Теги", fore=Fore.WHITE, back=Back.BLUE, style=Style.BRIGHT),
+            color_text("Створено", fore=Fore.WHITE, back=Back.BLUE, style=Style.BRIGHT),
+            color_text("Оновлено", fore=Fore.WHITE, back=Back.BLUE, style=Style.BRIGHT),
+        ]
+        return tabulate(table_data, headers=headers, tablefmt="grid")
+    else:
+        # Fallback without tabulate
+        lines = ["Назва | Текст | Теги | Створено | Оновлено"]
+        lines.append("-" * 50)
+        for row in table_data:
+            lines.append(" | ".join(row))
+        return "\n".join(lines)
+
+
 def parse_input(user_input: str):
     parts = user_input.strip().split()
     if not parts:
@@ -315,7 +345,11 @@ def main() -> None:
                 print("Good bye!")
                 break
             else:
-                print(info['handler'](info['object'], args))
+                result = info['handler'](info['object'], args)
+                if isinstance(result, list):
+                    print(format_notes_table(result))
+                else:
+                    print(result)
         else:
             print("❌ Невідома команда")
 

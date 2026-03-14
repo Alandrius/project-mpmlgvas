@@ -201,43 +201,43 @@ def remove_tag_handler(notebook: NoteBook, args: list) -> str:
 # Обробник команди search_by_title
 @input_error
 @require_args(1, "Використання: search-note <запит>", args_index=0)
-def search_by_title_handler(notebook: NoteBook, args: list) -> str:
+def search_by_title_handler(notebook: NoteBook, args: list):
     query = " ".join(args)
     results = notebook.search_by_title(query)
     if not results:
         return f"📭 Нотаток з назвою '{query}' не знайдено."
-    return "\n\n".join(str(note) for note in results)
+    return results
 
 # Обробник команди search_by_tag
 @input_error
 @require_args(1, "Використання: search-tag <тег>", args_index=0)
-def search_by_tag_handler(notebook: NoteBook, args: list) -> str:
+def search_by_tag_handler(notebook: NoteBook, args: list):
     tag = args[0]
     results = notebook.search_by_tag(tag)
     if not results:
         return f"📭 Нотаток з тегом '{tag}' не знайдено."
-    return "\n\n".join(str(note) for note in results)
+    return results
 
 # Обробник команди sort_by_title
-def sort_by_title_handler(notebook: NoteBook, args: list) -> str:
+def sort_by_title_handler(notebook: NoteBook, args: list):
     results = notebook.sort_by_title()
     if not results:
         return "📭 Нотаток ще немає."
-    return "\n\n".join(str(note) for note in results)
+    return results
 
 # Обробник команди sort_by_date
-def sort_by_date_handler(notebook: NoteBook, args: list) -> str:
+def sort_by_date_handler(notebook: NoteBook, args: list):
     results = notebook.sort_by_date()
     if not results:
         return "📭 Нотаток ще немає."
-    return "\n\n".join(str(note) for note in results)
+    return results
 
 # Обробник команди sort_by_tag
-def sort_by_tag_handler(notebook: NoteBook, args: list) -> str:
+def sort_by_tag_handler(notebook: NoteBook, args: list):
     results = notebook.sort_by_tag()
     if not results:
         return "📭 Нотаток ще немає."
-    return "\n\n".join(str(note) for note in results)
+    return results
 
-def all_notes_handler(notebook: NoteBook, args: list) -> str:
+def all_notes_handler(notebook: NoteBook, args: list):
     return sort_by_date_handler(notebook, args)
