@@ -45,7 +45,6 @@ class Note:
         if not clean_tags:
             raise ValueError("❌ Тег не може бути порожнім")
         clean_tag = clean_tags[0]
-
         if clean_tag not in self.tags:
             raise ValueError(f"Тег '{tag}' не знайдено в нотатці.")
         self.tags.remove(clean_tag)
@@ -62,6 +61,7 @@ class Note:
         )
 
 class NoteBook(UserDict):
+
     def add_note(self, title: str, text: str, tags: list[str] | None = None) -> Note:
         valid, clean_title = validate_note_title(title)
         if not valid:
@@ -138,67 +138,69 @@ class NoteBook(UserDict):
         return sorted(self.data.values(), key=lambda note: note.title.lower())
 
     def sort_by_date(self) -> list[Note]:
-        return sorted(self.data.values(), key=lambda note: note.created_at)
-    
+        return sorted(self.data.values(), key=lambda note: note.updated_at, reverse=True)
+
     def sort_by_tag(self) -> list[Note]:
-        # Нотатки з тегами — перші (відсортовані за першим тегом), без тегів — в кінці
         with_tags = sorted(
             [n for n in self.data.values() if n.tags],
             key=lambda note: note.tags[0]
         )
         without_tags = [n for n in self.data.values() if not n.tags]
         return with_tags + without_tags
-    
-# Обробник команди add-note
+
 @input_error
 def add_note_handler(notebook: NoteBook, args: list) -> str:
-    """Додає нотатку. Якщо args порожній, запитує назву та текст у користувача."""
     if not args:
         title = input("Назва нотатки: ").strip()
         text = input("Текст нотатки: ").strip()
     else:
         title = args[0]
         text = " ".join(args[1:])
-
     note = notebook.add_note(title, text)
     return f"✅ Нотатку '{note.title}' додано."
-    
-# Обробник команди edit-note
+
 @input_error
-@require_args(2, "Використання: edit-note <назва> <новий текст>", args_index=0)
 def edit_note_handler(notebook: NoteBook, args: list) -> str:
-    title = args[0]
-    new_text = " ".join(args[1:])
+    if not args:
+        title = input("Назва нотатки для редагування: ").strip()
+    else:
+        title = " ".join(args)
+    new_text = input("Новий текст: ").strip()
     note = notebook.edit_note(title, new_text)
     return f"✅ Нотатку '{note.title}' оновлено."
 
-# Обробник команди delete-note
 @input_error
 @require_args(1, "Використання: delete-note <назва>", args_index=0)
 def delete_note_handler(notebook: NoteBook, args: list) -> str:
-    title = args[0]
+    title = " ".join(args)
     notebook.delete_note(title)
     return f"✅ Нотатку '{title}' видалено."
-    
-# Обробник команди add-tags
+
 @input_error
-@require_args(2, "Використання: add-tags <назва нотатки> <тег1> <тег2> ...", args_index=0)
 def add_tags_handler(notebook: NoteBook, args: list) -> str:
-    title = args[0]
-    tags = args[1:]
+    if not args:
+        title = input("Назва нотатки: ").strip()
+    else:
+        title = " ".join(args)
+    raw = input("Теги (через пробіл): ").strip()
+    tags = raw.split() if raw else []
+    if not tags:
+        return "❌ Теги не можуть бути порожніми."
     note = notebook.add_tags(title, tags)
     return f"✅ Теги {note.tags} додано до '{note.title}'."
 
-# Обробник команди remove_tag
 @input_error
-@require_args(2, "Використання: remove-tag <назва нотатки> <тег>", args_index=0)
 def remove_tag_handler(notebook: NoteBook, args: list) -> str:
-    title = args[0]
-    tag = args[1]
+    if not args:
+        title = input("Назва нотатки: ").strip()
+    else:
+        title = " ".join(args)
+    tag = input("Тег для видалення: ").strip()
+    if not tag:
+        return "❌ Тег не може бути порожнім."
     note = notebook.remove_tag(title, tag)
     return f"✅ Тег '{tag}' видалено з '{note.title}'."
-    
-# Обробник команди search_by_title
+
 @input_error
 @require_args(1, "Використання: search-note <запит>", args_index=0)
 def search_by_title_handler(notebook: NoteBook, args: list):
@@ -208,7 +210,6 @@ def search_by_title_handler(notebook: NoteBook, args: list):
         return f"📭 Нотаток з назвою '{query}' не знайдено."
     return results
 
-# Обробник команди search_by_tag
 @input_error
 @require_args(1, "Використання: search-tag <тег>", args_index=0)
 def search_by_tag_handler(notebook: NoteBook, args: list):
@@ -218,21 +219,18 @@ def search_by_tag_handler(notebook: NoteBook, args: list):
         return f"📭 Нотаток з тегом '{tag}' не знайдено."
     return results
 
-# Обробник команди sort_by_title
 def sort_by_title_handler(notebook: NoteBook, args: list):
     results = notebook.sort_by_title()
     if not results:
         return "📭 Нотаток ще немає."
     return results
 
-# Обробник команди sort_by_date
 def sort_by_date_handler(notebook: NoteBook, args: list):
     results = notebook.sort_by_date()
     if not results:
         return "📭 Нотаток ще немає."
     return results
 
-# Обробник команди sort_by_tag
 def sort_by_tag_handler(notebook: NoteBook, args: list):
     results = notebook.sort_by_tag()
     if not results:
