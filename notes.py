@@ -131,7 +131,7 @@ class NoteBook(UserDict):
         return [note for note in self.data.values() if q in note.title.lower()]
 
     def search_by_tag(self, tag: str) -> list[Note]:
-        # Нотатки з тегами — перші (відсортовані за першим тегом), без тегів — в кінці
+        # Шукає нотатки де конкретний тег точно є у списку
         t = tag.strip().lower()
         return [note for note in self.data.values() if t in note.tags]
 
@@ -139,9 +139,11 @@ class NoteBook(UserDict):
         return sorted(self.data.values(), key=lambda note: note.title.lower())
 
     def sort_by_date(self) -> list[Note]:
+        # Сортує за датою оновлення (новіші перші)
         return sorted(self.data.values(), key=lambda note: note.updated_at, reverse=True)
 
     def sort_by_tag(self) -> list[Note]:
+        # Нотатки з тегами — перші (відсортовані за першим тегом), без тегів — в кінці
         with_tags = sorted(
             [n for n in self.data.values() if n.tags],
             key=lambda note: note.tags[0]
