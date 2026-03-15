@@ -20,7 +20,15 @@ class TestValidation(unittest.TestCase):
     def test_validate_phone_rejects_invalid_value(self):
         valid, message = validate_phone("123")
         self.assertFalse(valid)
-        self.assertIn("Неправильний формат телефону", message)
+        self.assertIn("Номер", message)
+
+    def test_validate_phone_accepts_other_country_codes(self):
+        valid, value = validate_phone("+12025551234")
+        self.assertTrue(valid)
+        self.assertEqual(value, "+12025551234")
+        valid2, value2 = validate_phone("44 20 7123 4567")
+        self.assertTrue(valid2)
+        self.assertEqual(value2, "+442071234567")
 
     def test_validate_email_lowercases_valid_email(self):
         valid, value = validate_email("User.Name@Example.COM")
