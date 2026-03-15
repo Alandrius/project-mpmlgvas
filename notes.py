@@ -63,7 +63,7 @@ class Note:
 
 class NoteBook(UserDict):
 
-    def add_note(self, title: str, text: str, tags: list[str] | None = None) -> Note:
+    def add_note(self, title: str, text: str, tags: Optional[list[str]] = None) -> Note:
         valid, clean_title = validate_note_title(title)
         if not valid:
             raise ValueError(clean_title)

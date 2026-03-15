@@ -11,20 +11,23 @@ def validate_name(name):
     return True, name.title()
 
 def validate_phone(phone):
-    """Перевірка телефону (Україна)"""
+    """Перевірка телефону (будь-який міжнародний формат з кодом країни)."""
     phone = phone.strip()
-    # Видаляємо всі пробіли, дужки, тире
-    phone = re.sub(r'[\s\-\(\)]', '', phone)
-    
-    # Патерни: +380XXXXXXXXX або 0XXXXXXXXX
-    if re.match(r'^\+?380\d{9}$', phone) or re.match(r'^0\d{9}$', phone):
-        # Приводимо до єдиного формату +380XXXXXXXXX
-        if phone.startswith('0'):
-            phone = '+38' + phone
-        elif phone.startswith('380'):
-            phone = '+' + phone
-        return True, phone
-    return False, "❌ Неправильний формат телефону. Використовуйте: +380501234567 або 0501234567"
+    # Залишаємо тільки + та цифри
+    phone_clean = re.sub(r'[\s\-\(\)]', '', phone)
+    digits_only = phone_clean.lstrip('+')
+
+    if not digits_only.isdigit():
+        return False, "❌ Номер має містити тільки цифри (та опційно + на початку)."
+    if len(digits_only) < 10 or len(digits_only) > 15:
+        return False, "❌ Номер має бути 10–15 цифр (з кодом країни). Приклад: +380501234567 або +1234567890"
+
+    # Нормалізуємо до формату +XXXXXXXXXX
+    if digits_only.startswith('0') and len(digits_only) == 10:
+        normalized = '+38' + digits_only  # український локальний формат
+    else:
+        normalized = '+' + digits_only
+    return True, normalized
 
 def validate_email(email):
     """Перевірка email"""

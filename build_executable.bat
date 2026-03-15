@@ -31,6 +31,14 @@ if errorlevel 1 (
     exit /b 1
 )
 
+echo Installing app dependencies (tabulate, colorama) so they are bundled...
+%PY_CMD% -m pip install tabulate colorama
+if errorlevel 1 (
+    echo Failed to install tabulate or colorama.
+    pause
+    exit /b 1
+)
+
 echo Cleaning old build files...
 if exist build rmdir /s /q build
 if exist dist rmdir /s /q dist
