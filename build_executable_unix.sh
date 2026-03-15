@@ -22,6 +22,9 @@ echo "Using: $PYTHON_CMD"
 echo "Installing PyInstaller..."
 "$PYTHON_CMD" -m pip install pyinstaller
 
+echo "Installing app dependencies (tabulate, colorama) so they are bundled..."
+"$PYTHON_CMD" -m pip install tabulate colorama
+
 echo "Cleaning old build folders..."
 rm -rf build dist assistant.spec
 
